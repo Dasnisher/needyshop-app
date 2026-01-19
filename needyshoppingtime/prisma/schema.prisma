@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // Uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Uses a direct connection
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  username   String       @unique
+  password   String
+  role       String
+  attendance Attendance[]
+}
+
+model Attendance {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  checkIn   DateTime  @default(now())
+  checkOut  DateTime?
+}
+
+model Product {
+  id        Int        @id @default(autoincrement())
+  name      String
+  sku       String
+  category  String
+  price     Decimal
+  cost      Decimal
+  stock     Int
+  saleItems SaleItem[]
+}
+
+model Sale {
+  id            String     @id @default(uuid())
+  total         Decimal
+  paymentMethod String
+  date          DateTime   @default(now())
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id        Int     @id @default(autoincrement())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal
+}
